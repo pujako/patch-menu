@@ -1,6 +1,7 @@
 # Patch Menu
 
-![image](https://github.com/user-attachments/assets/3dcb77c1-2e6b-4edc-b0c3-0b39f90c3145)
+![image](https://github.com/user-attachments/assets/8e4a5afc-a5a7-4ca6-bd99-ce3d2753ba32)
+
 
 
 `patch-menu` is a Python-based command-line tool designed for managing Linux patches and system maintenance. It provides a text-based user interface (TUI) for various administrative tasks, including checking server uptime, listing repository files, and applying patches.
