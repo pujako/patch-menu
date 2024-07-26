@@ -11,63 +11,71 @@ def patch_server(stdscr, server_list):
     
     confirmation = prompt_confirmation(stdscr, server_list, "patch")
     if confirmation == 'yes':
-       stdscr.clear()
-       stdscr.addstr(0, 0, "Patching the servers...\n")
-       stdscr.refresh()
+        stdscr.clear()
+        stdscr.addstr(0, 0, "Patching the servers...\n")
+        stdscr.refresh()
     
-       results = []
-       threads = []
+        results = []
+        threads = []
 
-    def run_command_on_remote(stdscr, cmd, y, x, hostname, results):
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        log_directory = 'log'
-        if not os.path.exists(log_directory):
-            os.makedirs(log_directory)
-        log_filename = f"{hostname}.patch.{timestamp}.log"
-        log_filepath = os.path.join(log_directory, log_filename)
+        def run_command_on_remote(stdscr, cmd, y, x, hostname, results):
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            log_directory = 'log'
+            if not os.path.exists(log_directory):
+                os.makedirs(log_directory)
+            log_filename = f"{hostname}.patch.{timestamp}.log"
+            log_filepath = os.path.join(log_directory, log_filename)
 
-        try:
-            client = ssh_login(hostname)  # Use the ssh_login function
-            stdin, stdout, stderr = client.exec_command(cmd)
-            uptime = stdout.read().decode().strip()
-            results.append(f"{hostname}: Patch stats: {uptime}")
-        except Exception as e:
-            results.append(f"{hostname}: Error fetching patch stats - {str(e)}")
-        finally:
-            if client:
-                client.close()
+            client = None
+            try:
+                client = ssh_login(hostname)  # Use the ssh_login function
+                stdin, stdout, stderr = client.exec_command(cmd)
+                stdout_lines = stdout.readlines()
+                stderr_lines = stderr.readlines()
+                results.append(f"{hostname}: Patch completed successfully.")
+            except Exception as e:
+                results.append(f"{hostname}: Error during patch - {str(e)}")
+            finally:
+                if client:
+                    client.close()
 
-        with open(log_filepath, 'w') as log_file:
-            log_file.write(f"Command: {cmd}\n")
-            log_file.write(f"Hostname: {hostname}\n\n")
-
-            for line in iter(stdout.readline, ""):
-                stdscr.addstr(y, x, f"{hostname}: {line.strip()}\n")
-                stdscr.refresh()
-                log_file.write(f"{line.strip()}\n")
+            with open(log_filepath, 'w') as log_file:
+                log_file.write(f"Command: {cmd}\n")
+                log_file.write(f"Hostname: {hostname}\n\n")
+                log_file.write("Standard Output:\n")
+                for line in stdout_lines:
+                    stdscr.addstr(y, x, f"{hostname}: {line.strip()}\n")
+                    stdscr.refresh()
+                    log_file.write(f"{line.strip()}\n")
+                log_file.write("Standard Error:\n")
+                for line in stderr_lines:
+                    log_file.write(f"{line.strip()}\n")
                 results.append(f"{hostname}: Complete!")
                 log_file.write("Complete!\n")
 
-    for idx, hostname in enumerate(server_list):
-        y = idx + 1
-        x = 0
-        cmd = "yum update -y"
-        thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
-        threads.append(thread)
-        thread.start()
+        for idx, hostname in enumerate(server_list):
+            y = idx + 1
+            x = 0
+            cmd = "yum update -y"
+            thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
+            threads.append(thread)
+            thread.start()
 
-    # Write results to file with timestamp
-    log_directory = 'log'
-    if not os.path.exists(log_directory):
-        os.makedirs(log_directory)
-    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f'patch_results_{timestamp}.txt'
-    filepath = os.path.join(log_directory, filename)
-    with open(filepath, 'w') as f:
-        for result in results:
-            f.write(result + '\n')
+        for thread in threads:
+            thread.join()
 
-    stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
-    stdscr.refresh()
-    stdscr.getch()
-    stdscr.clear()
+        # Write results to file with timestamp
+        log_directory = 'log'
+        if not os.path.exists(log_directory):
+            os.makedirs(log_directory)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f'patch_results_{timestamp}.txt'
+        filepath = os.path.join(log_directory, filename)
+        with open(filepath, 'w') as f:
+            for result in results:
+                f.write(result + '\n')
+
+        stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
+        stdscr.refresh()
+        stdscr.getch()
+        stdscr.clear()
