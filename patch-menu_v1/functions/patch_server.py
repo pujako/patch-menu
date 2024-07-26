@@ -1,6 +1,5 @@
 import threading
 import datetime
-import paramiko
 import os
 from utils.prompt_confirmation import prompt_confirmation
 from utils.ssh_utils import ssh_login  # Import the ssh_login function
@@ -19,7 +18,7 @@ def patch_server(stdscr, server_list):
        results = []
        threads = []
 
-    def run_command_on_remote(stdscr, cmd, y, x, hostname, results, client=None, is_reboot=False):
+    def run_command_on_remote(stdscr, cmd, y, x, hostname, results):
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         log_directory = 'log'
         if not os.path.exists(log_directory):
@@ -27,36 +26,35 @@ def patch_server(stdscr, server_list):
         log_filename = f"{hostname}.patch.{timestamp}.log"
         log_filepath = os.path.join(log_directory, log_filename)
 
-        if client is None:
-            try:
-                client = ssh_login(hostname)  # Use the ssh_login function
-            except paramiko.ssh_exception.AuthenticationException as e:
-                results.append(f"{hostname}: Authentication failed - {str(e)}")
+        try:
+            client = ssh_login(hostname)  # Use the ssh_login function
+            stdin, stdout, stderr = client.exec_command(cmd)
+            uptime = stdout.read().decode().strip()
+            results.append(f"{hostname}: Patch stats: {uptime}")
+        except Exception as e:
+            results.append(f"{hostname}: Error fetching patch stats - {str(e)}")
+        finally:
+            if client:
                 client.close()
-                return
-            except paramiko.ssh_exception.SSHException as e:
-                results.append(f"{hostname}: SSH session failed to establish - {str(e)}")
-                client.close()
-                return
-            except Exception as e:
-                results.append(f"{hostname}: Connection failed - {str(e)}")
-            client.close()
-            return
-
-        stdscr.addstr(y, x, f"{hostname}: {cmd}\n")
-        stdscr.refresh()
 
         with open(log_filepath, 'w') as log_file:
             log_file.write(f"Command: {cmd}\n")
             log_file.write(f"Hostname: {hostname}\n\n")
 
-        for idx, hostname in enumerate(server_list):
-            y = idx + 1
-            x = 0
-            cmd = "yum update -y"
-            thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
-            threads.append(thread)
-            thread.start()
+            for line in iter(stdout.readline, ""):
+                stdscr.addstr(y, x, f"{hostname}: {line.strip()}\n")
+                stdscr.refresh()
+                log_file.write(f"{line.strip()}\n")
+                results.append(f"{hostname}: Complete!")
+                log_file.write("Complete!\n")
+
+    for idx, hostname in enumerate(server_list):
+        y = idx + 1
+        x = 0
+        cmd = "yum update -y"
+        thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
+        threads.append(thread)
+        thread.start()
 
     # Write results to file with timestamp
     log_directory = 'log'
