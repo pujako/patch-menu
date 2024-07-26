@@ -2,6 +2,7 @@ import threading
 import os
 import datetime
 from utils.prompt_confirmation import prompt_confirmation
+from utils.ssh_utils import ssh_login  # Import the ssh_login function
 
 def patch_server(stdscr, server_list):
     stdscr.clear()
@@ -16,11 +17,25 @@ def patch_server(stdscr, server_list):
     
        results = []
        threads = []
+
+    # Function to patch server remotely
+    def run_command_and_patch(cmd, hostname):
+        nonlocal results
+        try:
+            client = ssh_login(hostname)  # Use the ssh_login function
+            stdin, stdout, stderr = client.exec_command(cmd)
+            Patching = stdout.read().decode().strip()
+            results.append(f"{hostname}: Patching stat: {Patching}")
+        except Exception as e:
+            results.append(f"{hostname}: Error fetching patch stat - {str(e)}")
+        finally:
+            if client:
+                client.close()
     
     # Start threads for each server
     for hostname in server_list:
         cmd = "yum update -y"
-        thread = threading.Thread(target=patch_server, args=(cmd, hostname))
+        thread = threading.Thread(target=run_command_and_patch, args=(cmd, hostname))
         threads.append(thread)
         thread.start()
     
@@ -42,4 +57,4 @@ def patch_server(stdscr, server_list):
     stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
     stdscr.refresh()
     stdscr.getch()
-
+    stdscr.clear()
