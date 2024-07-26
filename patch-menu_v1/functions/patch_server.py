@@ -1,7 +1,9 @@
 # functions/patch_server.py
+
 import threading
 import datetime
 import os
+import curses
 from utils.prompt_confirmation import prompt_confirmation
 from utils.ssh_utils import ssh_login  # Import the ssh_login function
 
@@ -32,18 +34,22 @@ def patch_server(stdscr, server_list):
                 client = ssh_login(hostname)  # Use the ssh_login function
                 stdin, stdout, stderr = client.exec_command(cmd)
 
-                stdout_lines = stdout.read().decode().splitlines()
-                stderr_lines = stderr.read().decode().splitlines()
-
                 with open(log_filepath, 'w') as log_file:
                     log_file.write(f"Command: {cmd}\n")
                     log_file.write(f"Hostname: {hostname}\n\n")
                     log_file.write("Standard Output:\n")
-                    for line in stdout_lines:
-                        stdscr.addstr(y, x, f"{hostname}: {line}\n")
+                    
+                    # Reading stdout line by line
+                    while True:
+                        line = stdout.readline()
+                        if not line:
+                            break
+                        stdscr.addstr(y, x, f"{hostname}: {line}")
                         stdscr.refresh()
-                        log_file.write(f"{line}\n")
-                    log_file.write("Standard Error:\n")
+                        log_file.write(f"{line}")
+
+                    log_file.write("\nStandard Error:\n")
+                    stderr_lines = stderr.read().decode().splitlines()
                     for line in stderr_lines:
                         stdscr.addstr(y, x, f"{hostname}: {line}\n")
                         stdscr.refresh()
