@@ -76,7 +76,7 @@ def bounce_server(stdscr, server_list):
                             # Wait for 20 seconds before proceeding to the next server
                             # If this is not the last server, wait for 20 seconds before proceeding to the next server
                             if hostname != selected_servers[-1]:
-                                time.sleep(50)
+                                time.sleep(20)
 
                             log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
 
