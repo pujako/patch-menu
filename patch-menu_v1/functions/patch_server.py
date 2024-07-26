@@ -24,7 +24,8 @@ def patch_server(stdscr, server_list):
         def run_command_on_remote_patch(stdscr, cmd, y, x, hostname, results):
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             # Get the directory of the main.py script
-            main_dir = os.path.dirname(os.path.realpath(__file__))
+            main_py_path = os.path.abspath(__file__)  # Path to this script
+            main_dir = os.path.dirname(main_py_path)  # Directory of this script
             log_directory = os.path.join(main_dir, 'logs')
             if not os.path.exists(log_directory):
                 os.makedirs(log_directory)
