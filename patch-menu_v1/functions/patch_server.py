@@ -30,28 +30,32 @@ def patch_server(stdscr, server_list):
             try:
                 client = ssh_login(hostname)  # Use the ssh_login function
                 stdin, stdout, stderr = client.exec_command(cmd)
-                stdout_lines = stdout.readlines()
-                stderr_lines = stderr.readlines()
+                
+                # Capture output
+                stdout_lines = stdout.read().decode().splitlines()
+                stderr_lines = stderr.read().decode().splitlines()
+                
+                with open(log_filepath, 'w') as log_file:
+                    log_file.write(f"Command: {cmd}\n")
+                    log_file.write(f"Hostname: {hostname}\n\n")
+                    log_file.write("Standard Output:\n")
+                    for line in stdout_lines:
+                        stdscr.addstr(y, x, f"{hostname}: {line}\n")
+                        stdscr.refresh()
+                        log_file.write(f"{line}\n")
+                    log_file.write("Standard Error:\n")
+                    for line in stderr_lines:
+                        stdscr.addstr(y, x, f"{hostname}: {line}\n")
+                        stdscr.refresh()
+                        log_file.write(f"{line}\n")
+                    
                 results.append(f"{hostname}: Patch completed successfully.")
             except Exception as e:
                 results.append(f"{hostname}: Error during patch - {str(e)}")
             finally:
                 if client:
                     client.close()
-
-            with open(log_filepath, 'w') as log_file:
-                log_file.write(f"Command: {cmd}\n")
-                log_file.write(f"Hostname: {hostname}\n\n")
-                log_file.write("Standard Output:\n")
-                for line in stdout_lines:
-                    stdscr.addstr(y, x, f"{hostname}: {line.strip()}\n")
-                    stdscr.refresh()
-                    log_file.write(f"{line.strip()}\n")
-                log_file.write("Standard Error:\n")
-                for line in stderr_lines:
-                    log_file.write(f"{line.strip()}\n")
                 results.append(f"{hostname}: Complete!")
-                log_file.write("Complete!\n")
 
         for idx, hostname in enumerate(server_list):
             y = idx + 1
