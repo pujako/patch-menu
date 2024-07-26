@@ -59,13 +59,12 @@ def gather_server_info(stdscr, server_list):
         finally:
             ssh.close()
 
-    results = gather_server_info(stdscr, server_list)
     stdscr.clear()
     stdscr.addstr(0, 0, "Information gathered. Results:\n")
     stdscr.refresh()
 
     for result in results:
         stdscr.addstr(result + '\n')
-        stdscr.addstr(len(server_list) + 1, 0, "Press any key to return to the menu.")
-        stdscr.refresh()
-        stdscr.getch()
+    stdscr.addstr(len(server_list) + 1, 0, "Press any key to return to the menu.")
+    stdscr.refresh()
+    stdscr.getch()
