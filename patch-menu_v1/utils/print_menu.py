@@ -71,10 +71,4 @@ def main(stdscr):
             selected_row_idx -= 1
         elif key == curses.KEY_DOWN and selected_row_idx < len(menu) - 1:
             selected_row_idx += 1
-        elif key == curses.KEY_ENTER or key in [10, 13]:
-            # Handle the selected menu option here
-            if menu[selected_row_idx] == 'Exit':
-                break
-
-if __name__ == "__main__":
-    curses.wrapper(main)
+        elif key == curses.KEY_ENTER or key in [
