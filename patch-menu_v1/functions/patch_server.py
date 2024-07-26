@@ -1,11 +1,9 @@
-# functions/patch_server.py
-
 import threading
 import datetime
 import os
-import curses
 from utils.prompt_confirmation import prompt_confirmation
 from utils.ssh_utils import ssh_login  # Import the ssh_login function
+
 
 def patch_server(stdscr, server_list):
     stdscr.clear()
