@@ -21,7 +21,7 @@ def patch_server(stdscr, server_list):
         results = []
         threads = []
 
-        def run_command_on_remote(stdscr, cmd, y, x, hostname, results):
+        def run_command_on_remote_patch(stdscr, cmd, y, x, hostname, results):
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             log_directory = 'logs'
             if not os.path.exists(log_directory):
@@ -67,7 +67,7 @@ def patch_server(stdscr, server_list):
             y = idx + 1
             x = 0
             cmd = "yum update -y"
-            thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
+            thread = threading.Thread(target=run_command_on_remote_patch, args=(stdscr, cmd, y, x, hostname, results))
             threads.append(thread)
             thread.start()
 
