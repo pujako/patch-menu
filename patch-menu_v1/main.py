@@ -1,5 +1,4 @@
 import curses
-import threading
 import time
 import os
 import datetime
@@ -11,10 +10,10 @@ from functions.list_servers import list_servers
 from functions.list_repo_files import list_repo_files
 from functions.disable_external_repos import disable_external_repos
 from functions.enable_external_repos import enable_external_repos
-from utils.prompt_confirmation import prompt_confirmation
 from utils.select_servers_to_reboot import select_servers_to_reboot
 from functions.check_server_uptime import check_server_uptime
 from functions.gather_server_info import gather_server_info
+from functions.patch_server import patch_server
 
 
 def main(stdscr):
@@ -68,47 +67,7 @@ def main(stdscr):
             elif current_row == 6:  # Enable external repos
                 enable_external_repos(stdscr, server_list)
             elif current_row == 7:  # Patch servers
-                stdscr.clear()
-                stdscr.addstr(0, 0, "Preparing to patch the servers...\n")
-                stdscr.refresh()
-
-                confirmation = prompt_confirmation(stdscr, server_list, "patch")
-                if confirmation == 'yes':
-                    stdscr.clear()
-                    stdscr.addstr(0, 0, "Patching the servers...\n")
-                    stdscr.refresh()
-
-                    results = []
-                    threads = []
-                    for idx, hostname in enumerate(server_list):
-                        y = idx + 1
-                        x = 0
-                        cmd = "yum update -y"
-                        thread = threading.Thread(target=run_command_on_remote, args=(stdscr, cmd, y, x, hostname, results))
-                        threads.append(thread)
-                        thread.start()
-
-                    for thread in threads:
-                        thread.join()
-
-                    # Write results to file with timestamp
-                    log_directory = 'log'
-                    if not os.path.exists(log_directory):
-                        os.makedirs(log_directory)
-                    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                    filename = f'patch_results_{timestamp}.txt'
-                    filepath = os.path.join(log_directory, filename)
-                    with open(filepath, 'w') as f:
-                        for result in results:
-                            f.write(result + '\n')
-
-                    stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
-                    stdscr.refresh()
-                    stdscr.getch()
-
-                stdscr.clear()
-                menu = print_menu(stdscr, current_row)
-
+                patch_server(stdscr, server_list)
             elif current_row == 8:  # Reboot servers
                 stdscr.clear()
                 stdscr.addstr(0, 0, "Preparing to reboot the servers...\n")
