@@ -43,7 +43,7 @@ def print_menu(stdscr, selected_row_idx, menu):
             stdscr.addstr(y, x, row)
 
     # Adding initials at the bottom centered
-    initials = "P.J."
+    initials = "pujako"
     initials_x = w // 2 - len(initials) // 2
     initials_y = h - 2  # Positioning the initials at the bottom
     stdscr.addstr(initials_y, initials_x, initials)
