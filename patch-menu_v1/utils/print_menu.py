@@ -1,8 +1,8 @@
 import curses
+import time
 from datetime import datetime
 
 def print_menu(stdscr, selected_row_idx):
-    stdscr.clear()
     h, w = stdscr.getmaxyx()
 
     # Adding the title
@@ -25,11 +25,6 @@ def print_menu(stdscr, selected_row_idx):
     stdscr.addstr(title_y + 1, title_x - 1, "-" * len(title), curses.A_BOLD)
     stdscr.attroff(curses.color_pair(2))
 
-    # Adding live system date and time under the title
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    date_time_x = w // 2 - len(now) // 2
-    stdscr.addstr(title_y + 2, date_time_x, now)
-
     # Defining the menu items
     menu = ['Enter server list', 'List servers', 'Check server uptime', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
 
@@ -44,10 +39,30 @@ def print_menu(stdscr, selected_row_idx):
             stdscr.addstr(y, x, row)
 
     # Adding initials at the bottom centered
-    initials = "P.J."
+    initials = "pujako"
     initials_x = w // 2 - len(initials) // 2
     initials_y = h - 2  # Positioning the initials at the bottom
     stdscr.addstr(initials_y, initials_x, initials)
 
-    stdscr.refresh()
-    return menu
+def main(stdscr):
+    curses.curs_set(0)
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    selected_row_idx = 0
+
+    while True:
+        stdscr.clear()
+        print_menu(stdscr, selected_row_idx)
+
+        # Adding live system date and time under the title
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        h, w = stdscr.getmaxyx()
+        date_time_x = w // 2 - len(now) // 2
+        stdscr.addstr(3, date_time_x, now)
+
+        stdscr.refresh()
+        time.sleep(1)  # Refresh every second
+
+if __name__ == "__main__":
+    curses.wrapper(main)
