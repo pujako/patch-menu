@@ -37,7 +37,25 @@ def main(stdscr):
             elif current_row == 2:  # Check server uptime
                 check_server_uptime(stdscr, server_list)
             elif current_row == 3:  # Gather server info
-                gather_server_info (stdscr, server_list)
+                stdscr.clear()
+                stdscr.addstr(0, 0, "Gathering information from the servers...\n")
+                stdscr.refresh()
+
+                results = gather_server_info(stdscr, server_list)
+
+                stdscr.clear()
+                stdscr.addstr(0, 0, "Information gathered. Results:\n")
+                stdscr.refresh()
+
+                for result in results:
+                    stdscr.addstr(result + '\n')
+
+                stdscr.addstr(len(server_list) + 1, 0, "Press any key to return to the menu.")
+                stdscr.refresh()
+                stdscr.getch()
+
+                stdscr.clear()
+                menu = print_menu(stdscr, current_row)
             elif current_row == 4:  # List repo files
                 list_repo_files(stdscr, server_list)
             elif current_row == 5:  # Disable external repos
