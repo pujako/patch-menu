@@ -2,7 +2,7 @@ import curses
 from datetime import datetime
 import time
 
-def print_menu(stdscr, selected_row_idx):
+def print_menu(stdscr, selected_row_idx, menu):
     stdscr.clear()
     h, w = stdscr.getmaxyx()
 
@@ -31,9 +31,7 @@ def print_menu(stdscr, selected_row_idx):
     date_time_x = w // 2 - len(now) // 2
     stdscr.addstr(title_y + 2, date_time_x, now)
 
-    # Defining the menu items
-    menu = ['Enter server list', 'List servers', 'Check server uptime', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
-
+    # Adding menu items
     for idx, row in enumerate(menu):
         x = w // 2 - len(row) // 2
         y = h // 2 - len(menu) // 2 + idx + 2 + 2  # +2 to account for the title, +2 for the date and time
@@ -58,10 +56,11 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
+    menu = ['Enter server list', 'List servers', 'Check server uptime', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
     current_row = 0
 
     while True:
-        print_menu(stdscr, current_row)
+        print_menu(stdscr, current_row, menu)
         stdscr.timeout(1000)  # Wait for 1000 milliseconds for user input
         key = stdscr.getch()
 
@@ -72,8 +71,6 @@ def main(stdscr):
         elif key == curses.KEY_ENTER or key in [10, 13]:
             if current_row == len(menu) - 1:
                 break  # Exit the program
-
-        print_menu(stdscr, current_row)
 
 if __name__ == "__main__":
     curses.wrapper(main)
