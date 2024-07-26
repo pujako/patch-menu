@@ -57,11 +57,11 @@ def bounce_server(stdscr, server_list):
                         # Issue reboot command
                         stdin, stdout, stderr = client.exec_command(cmd)
                         stdout.channel.recv_exit_status()  # Wait for command to complete
-                        time.sleep(20)  # Wait before checking server status
+                        time.sleep(30)  # Wait before checking server status
 
                         # Check server status
                         while not check_server_up(hostname):
-                            time.sleep(20)  # Check every 5 seconds if the server is back online
+                            time.sleep(30)  # Check every 5 seconds if the server is back online
 
                         try:
                             client.close()  # Close the previous client
@@ -76,7 +76,7 @@ def bounce_server(stdscr, server_list):
                             # Wait for 20 seconds before proceeding to the next server
                             # If this is not the last server, wait for 20 seconds before proceeding to the next server
                             if hostname != selected_servers[-1]:
-                                time.sleep(30)
+                                time.sleep(50)
 
                             log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
 
@@ -111,7 +111,7 @@ def bounce_server(stdscr, server_list):
             if not os.path.exists(log_directory):
                 os.makedirs(log_directory)
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f'reboot_results_{timestamp}.txt'
+            filename = f'bounce_results_{timestamp}.txt'
             filepath = os.path.join(log_directory, filename)
             with open(filepath, 'w') as f:
                 for result in results:
