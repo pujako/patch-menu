@@ -11,7 +11,7 @@ def run_command_on_remote(stdscr, cmd, y, x, hostname, results, client=None, is_
     log_directory = 'log'
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
-    log_filename = f"{hostname}.yumupdate.{timestamp}.log"
+    log_filename = f"{hostname}.reboot.{timestamp}.log"
     log_filepath = os.path.join(log_directory, log_filename)
 
     if client is None:
