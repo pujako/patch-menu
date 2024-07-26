@@ -30,11 +30,10 @@ def patch_server(stdscr, server_list):
             try:
                 client = ssh_login(hostname)  # Use the ssh_login function
                 stdin, stdout, stderr = client.exec_command(cmd)
-                
-                # Capture output
+
                 stdout_lines = stdout.read().decode().splitlines()
                 stderr_lines = stderr.read().decode().splitlines()
-                
+
                 with open(log_filepath, 'w') as log_file:
                     log_file.write(f"Command: {cmd}\n")
                     log_file.write(f"Hostname: {hostname}\n\n")
@@ -83,3 +82,4 @@ def patch_server(stdscr, server_list):
         stdscr.refresh()
         stdscr.getch()
         stdscr.clear()
+
