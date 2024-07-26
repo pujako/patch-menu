@@ -81,5 +81,4 @@ def patch_server(stdscr, server_list):
         stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
         stdscr.refresh()
         stdscr.getch()
-        stdscr.clear()
 
