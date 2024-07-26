@@ -5,7 +5,7 @@ from utils.ssh_utils import ssh_login  # Import the ssh_login function
 
 def gather_server_info(stdscr, server_list):
     # Define the log directory
-    log_directory = 'log'
+    log_directory = 'logs'
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
