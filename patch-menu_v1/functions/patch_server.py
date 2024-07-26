@@ -1,3 +1,4 @@
+# functions/patch_server.py
 import threading
 import datetime
 import os
@@ -20,7 +21,7 @@ def patch_server(stdscr, server_list):
 
         def run_command_on_remote(stdscr, cmd, y, x, hostname, results):
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            log_directory = 'log'
+            log_directory = 'logs'
             if not os.path.exists(log_directory):
                 os.makedirs(log_directory)
             log_filename = f"{hostname}.patch.{timestamp}.log"
@@ -68,7 +69,7 @@ def patch_server(stdscr, server_list):
             thread.join()
 
         # Write results to file with timestamp
-        log_directory = 'log'
+        log_directory = 'logs'
         if not os.path.exists(log_directory):
             os.makedirs(log_directory)
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -81,4 +82,3 @@ def patch_server(stdscr, server_list):
         stdscr.addstr(len(server_list) + 1, 0, f"Patching complete. Results saved to {filepath}. Press any key to return to the menu.")
         stdscr.refresh()
         stdscr.getch()
-
