@@ -57,38 +57,38 @@ def bounce_server(stdscr, server_list):
                         # Issue reboot command
                         stdin, stdout, stderr = client.exec_command(cmd)
                         stdout.channel.recv_exit_status()  # Wait for command to complete
-                        time.sleep(30)  # Wait before checking server status
+                        time.sleep(20)  # Wait before checking server status
 
                         # Check server status
                         while not check_server_up(hostname):
-                            time.sleep(30)  # Check every 5 seconds if the server is back online
+                            time.sleep(5)  # Check every 5 seconds if the server is back online
 
-                        try:
-                            client.close()  # Close the previous client
-                            client = ssh_login(hostname)  # Reconnect
+                            try:
+                                client.close()  # Close the previous client
+                                client = ssh_login(hostname)  # Reconnect
 
-                            stdin, stdout, stderr = client.exec_command("uptime")
-                            uptime = stdout.read().decode().strip()
-                            results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
-                            stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
-                            stdscr.refresh()
+                                stdin, stdout, stderr = client.exec_command("uptime")
+                                uptime = stdout.read().decode().strip()
+                                results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
+                                stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
+                                stdscr.refresh()
 
                             # Wait for 20 seconds before proceeding to the next server
                             # If this is not the last server, wait for 20 seconds before proceeding to the next server
-                            if hostname != selected_servers[-1]:
-                                time.sleep(50)
+                                if hostname != selected_servers[-1]:
+                                    time.sleep(50)
 
-                            log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
+                                log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
 
-                        except Exception as e:
-                            results.append(f"{hostname}: Error fetching uptime - {str(e)}")
-                            stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
-                            stdscr.refresh()
-                            log_file.write(f"Error fetching uptime - {str(e)}\n")
+                            except Exception as e:
+                                results.append(f"{hostname}: Error fetching uptime - {str(e)}")
+                                stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
+                                stdscr.refresh()
+                                log_file.write(f"Error fetching uptime - {str(e)}\n")
 
-                        finally:
-                            if client is not None:
-                                client.close()  # Ensure client is closed properly
+                            finally:
+                                if client is not None:
+                                    client.close()  # Ensure client is closed properly
 
                     else:
                         # Handle non-reboot commands here
