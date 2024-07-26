@@ -60,8 +60,8 @@ def bounce_server(stdscr, server_list):
                         time.sleep(20)  # Wait before checking server status
 
                         # Check server status
-                        while check_server_up(hostname):
-                            time.sleep(5)  # Check every 5 seconds if the server is back online
+                        while not check_server_up(hostname):
+                            time.sleep(20)  # Check every 5 seconds if the server is back online
 
                         try:
                             client.close()  # Close the previous client
