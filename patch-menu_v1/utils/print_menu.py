@@ -28,7 +28,9 @@ def print_menu(stdscr, selected_row_idx):
     # Adding live system date and time under the title
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     date_time_x = w // 2 - len(now) // 2
+    stdscr.attron(curses.color_pair(3) | curses.A_BOLD)  # Blue color and bold    
     stdscr.addstr(title_y + 2, date_time_x, now)
+    stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
 
     # Defining the menu items
     menu = ['Enter server list', 'List servers', 'Check server uptime', 'Check Oracle DB Status', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
