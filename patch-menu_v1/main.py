@@ -49,7 +49,7 @@ def main(stdscr):
                 enable_external_repos(stdscr, server_list)
             elif current_row == 8:  # Patch servers
                 patch_server(stdscr, server_list)
-            elif current_row == 8:  # Reboot servers
+            elif current_row == 9:  # Reboot servers
                 bounce_server(stdscr, server_list)
             elif current_row == 10:  # Exit
                 break
