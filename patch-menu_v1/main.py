@@ -19,36 +19,24 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
     selected_row_idx = 0
-    selected_col_idx = 0  # 0 for the left column, 1 for the right column, 2 for exit
+    selected_col_idx = 0  # 0 for the left column, 1 for the right column
     server_list = []
 
     while True:
-        insight_menu, action_menu, exit_option = print_menu(stdscr, selected_row_idx, selected_col_idx)
+        insight_menu, action_menu = print_menu(stdscr, selected_row_idx, selected_col_idx)
 
         key = stdscr.getch()
 
         max_menu_len = max(len(insight_menu), len(action_menu))
         
         if key == curses.KEY_UP:
-            if selected_col_idx == 2:
-                selected_col_idx = 0
-                selected_row_idx = max_menu_len - 1
-            else:
-                selected_row_idx = (selected_row_idx - 1) % max_menu_len
+            selected_row_idx = (selected_row_idx - 1) % max_menu_len
         elif key == curses.KEY_DOWN:
-            if selected_col_idx == 2:
-                selected_col_idx = 0
-                selected_row_idx = 0
-            else:
-                selected_row_idx = (selected_row_idx + 1) % max_menu_len
+            selected_row_idx = (selected_row_idx + 1) % max_menu_len
         elif key == curses.KEY_LEFT:
-            selected_col_idx = (selected_col_idx - 1) % 3
-            if selected_col_idx == 2:
-                selected_col_idx = 1
+            selected_col_idx = (selected_col_idx - 1) % 2
         elif key == curses.KEY_RIGHT:
-            selected_col_idx = (selected_col_idx + 1) % 3
-            if selected_col_idx == 2:
-                selected_col_idx = 0
+            selected_col_idx = (selected_col_idx + 1) % 2
         elif key == curses.KEY_ENTER or key == 10:
             if selected_col_idx == 0:
                 if selected_row_idx == 0:  # Enter server list
@@ -72,8 +60,8 @@ def main(stdscr):
                     patch_server(stdscr, server_list)
                 elif selected_row_idx == 3:  # Reboot servers
                     bounce_server(stdscr, server_list)
-            elif selected_col_idx == 2:
-                break  # Exit
+                elif selected_row_idx == 4:  # Exit
+                    break  # Exit
 
     curses.endwin()
 

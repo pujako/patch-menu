@@ -32,8 +32,7 @@ def print_menu(stdscr, selected_row_idx, selected_col_idx):
 
     # Defining the menu items
     insight_menu = ['Enter server list', 'List servers', 'Check server uptime', 'Check Oracle DB Status', 'Gather server info', 'List repo files']
-    action_menu = ['Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers']
-    exit_option = ['Exit']
+    action_menu = ['Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
 
     menu_start_y = h // 2 - max(len(insight_menu), len(action_menu)) // 2 + 4
 
@@ -57,20 +56,12 @@ def print_menu(stdscr, selected_row_idx, selected_col_idx):
         else:
             stdscr.addstr(y, x, row)
 
-    exit_x = w // 2 - len(exit_option[0]) // 2
-    exit_y = menu_start_y + max(len(insight_menu), len(action_menu))
-    if selected_col_idx == 2:
-        stdscr.attron(curses.color_pair(1))
-        stdscr.addstr(exit_y, exit_x, exit_option[0])
-        stdscr.attroff(curses.color_pair(1))
-    else:
-        stdscr.addstr(exit_y, exit_x, exit_option[0])
-
+    # Commented out initials
     # Adding initials at the bottom centered
-    initials = "pujako"
-    initials_x = w // 2 - len(initials) // 2
-    initials_y = h - 2  # Positioning the initials at the bottom
-    stdscr.addstr(initials_y, initials_x, initials)
+    # initials = "pujako"
+    # initials_x = w // 2 - len(initials) // 2
+    # initials_y = h - 2  # Positioning the initials at the bottom
+    # stdscr.addstr(initials_y, initials_x, initials)
 
     stdscr.refresh()
-    return insight_menu, action_menu, exit_option
+    return insight_menu, action_menu
