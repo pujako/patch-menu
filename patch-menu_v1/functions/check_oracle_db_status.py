@@ -52,3 +52,4 @@ def check_oracle_db_status(stdscr, server_list):
     stdscr.addstr(y, 0, "Press any key to return to the menu.")
     stdscr.refresh()
     stdscr.getch()
+
