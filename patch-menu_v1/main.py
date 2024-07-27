@@ -10,6 +10,7 @@ from functions.check_server_uptime import check_server_uptime
 from functions.gather_server_info import gather_server_info
 from functions.patch_server import patch_server
 from functions.bounce_server import bounce_server
+from functions.check_oracle_db_status import check_oracle_db_status
 
 
 def main(stdscr):
@@ -36,19 +37,21 @@ def main(stdscr):
                 list_servers(stdscr, server_list)
             elif current_row == 2:  # Check server uptime
                 check_server_uptime(stdscr, server_list)
-            elif current_row == 3:  # Gather server info
+            elif current_row == 3:  # Check Oracle DB Status
+                check_oracle_db_status(stdscr, server_list)
+            elif current_row == 4:  # Gather server info
                 gather_server_info (stdscr, server_list)
-            elif current_row == 4:  # List repo files
+            elif current_row == 5:  # List repo files
                 list_repo_files(stdscr, server_list)
-            elif current_row == 5:  # Disable external repos
+            elif current_row == 6:  # Disable external repos
                 disable_external_repos(stdscr, server_list)
-            elif current_row == 6:  # Enable external repos
+            elif current_row == 7:  # Enable external repos
                 enable_external_repos(stdscr, server_list)
-            elif current_row == 7:  # Patch servers
+            elif current_row == 8:  # Patch servers
                 patch_server(stdscr, server_list)
             elif current_row == 8:  # Reboot servers
                 bounce_server(stdscr, server_list)
-            elif current_row == 9:  # Exit
+            elif current_row == 10:  # Exit
                 break
 
         menu = print_menu(stdscr, current_row)
