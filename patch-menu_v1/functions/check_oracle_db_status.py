@@ -15,6 +15,8 @@ def check_oracle_db_status(stdscr, server_list):
         try:
             client = ssh_login(hostname)  # Use the ssh_login function
             stdin, stdout, stderr = client.exec_command(cmd)
+            
+            # Read stdout and stderr
             output = stdout.read().decode().strip()
             error = stderr.read().decode().strip()
 
@@ -42,7 +44,7 @@ def check_oracle_db_status(stdscr, server_list):
         thread.join()
 
     # Display results
-    y = len(server_list) + 2
+    y = 1
     for result in results:
         stdscr.addstr(y, 0, f"{result}\n")
         y += 1
