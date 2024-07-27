@@ -71,8 +71,6 @@ def main(stdscr):
                 elif selected_row_idx == 3:  # Reboot servers
                     bounce_server(stdscr, server_list)
 
-        insight_menu, action_menu, exit_option = print_menu(stdscr, selected_row_idx, selected_col_idx)
-
     curses.endwin()
 
 
