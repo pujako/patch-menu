@@ -45,7 +45,7 @@ def check_oracle_db_status(stdscr, server_list):
     y = 1
     for result in results:
         stdscr.addstr(y, 0, f"{result}\n")
-        y += 1
+        y += result.count('\n') + 1  # Adjust y for the number of lines in the result
 
     stdscr.addstr(y, 0, "Press any key to return to the menu.")
     stdscr.refresh()
