@@ -31,7 +31,7 @@ def print_menu(stdscr, selected_row_idx):
     stdscr.addstr(title_y + 2, date_time_x, now)
 
     # Defining the menu items
-    menu = ['Enter server list', 'List servers', 'Check server uptime', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
+    menu = ['Enter server list', 'List servers', 'Check server uptime', 'Check Oracle DB Status', 'Gather server info', 'List repo files', 'Disable external repos', 'Enable external repos', 'Patch servers', 'Reboot servers', 'Exit']
 
     for idx, row in enumerate(menu):
         x = w // 2 - len(row) // 2
