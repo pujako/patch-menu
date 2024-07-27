@@ -19,7 +19,7 @@ def main(stdscr):
     curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
     selected_row_idx = 0
-    selected_col_idx = 0  # 0 for the left column, 1 for the right column
+    selected_col_idx = 0  # 0 for the left column, 1 for the right column, 2 for exit
     server_list = []
 
     while True:
@@ -27,24 +27,24 @@ def main(stdscr):
 
         key = stdscr.getch()
 
+        max_menu_len = max(len(insight_menu), len(action_menu))
+        
         if key == curses.KEY_UP:
-            if selected_col_idx == 0:
-                selected_row_idx = (selected_row_idx - 1) % (len(insight_menu) + 1)
+            if selected_col_idx == 2:
+                selected_col_idx = 0
+                selected_row_idx = max_menu_len - 1
             else:
-                selected_row_idx = (selected_row_idx - 1) % (len(action_menu))
+                selected_row_idx = (selected_row_idx - 1) % max_menu_len
         elif key == curses.KEY_DOWN:
-            if selected_col_idx == 0:
-                selected_row_idx = (selected_row_idx + 1) % (len(insight_menu) + 1)
+            if selected_col_idx == 2:
+                selected_col_idx = 0
+                selected_row_idx = 0
             else:
-                selected_row_idx = (selected_row_idx + 1) % (len(action_menu))
+                selected_row_idx = (selected_row_idx + 1) % max_menu_len
         elif key == curses.KEY_LEFT:
-            selected_col_idx = 0
-            if selected_row_idx >= len(insight_menu):
-                selected_row_idx = 0
+            selected_col_idx = (selected_col_idx - 1) % 3
         elif key == curses.KEY_RIGHT:
-            selected_col_idx = 1
-            if selected_row_idx >= len(action_menu):
-                selected_row_idx = 0
+            selected_col_idx = (selected_col_idx + 1) % 3
         elif key == curses.KEY_ENTER or key == 10:
             if selected_col_idx == 0:
                 if selected_row_idx == 0:  # Enter server list
@@ -59,9 +59,7 @@ def main(stdscr):
                     gather_server_info(stdscr, server_list)
                 elif selected_row_idx == 5:  # List repo files
                     list_repo_files(stdscr, server_list)
-                elif selected_row_idx == len(insight_menu):  # Exit
-                    break
-            else:
+            elif selected_col_idx == 1:
                 if selected_row_idx == 0:  # Disable external repos
                     disable_external_repos(stdscr, server_list)
                 elif selected_row_idx == 1:  # Enable external repos
@@ -70,6 +68,8 @@ def main(stdscr):
                     patch_server(stdscr, server_list)
                 elif selected_row_idx == 3:  # Reboot servers
                     bounce_server(stdscr, server_list)
+            elif selected_col_idx == 2:
+                break  # Exit
 
     curses.endwin()
 
