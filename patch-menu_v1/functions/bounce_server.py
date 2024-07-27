@@ -36,54 +36,41 @@ def bounce_server(stdscr, server_list):
                 y = idx + 1
                 x = 0
                 cmd = "shutdown -r now"
-                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-                log_directory = 'logs'
-                if not os.path.exists(log_directory):
-                    os.makedirs(log_directory)
-                log_filename = f"{hostname}.bounce.{timestamp}.log"
-                log_filepath = os.path.join(log_directory, log_filename)
 
-                with open(log_filepath, 'w') as log_file:
-                    log_file.write(f"Command: {cmd}\n")
-                    log_file.write(f"Hostname: {hostname}\n\n")
+                results.append(f"{hostname}: Rebooting...")
+                stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
+                stdscr.refresh()
 
-                    results.append(f"{hostname}: Rebooting...")
-                    stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
+                try:
+                    # Initialize SSH client
+                    client = ssh_login(hostname)
+
+                    # Issue reboot command
+                    stdin, stdout, stderr = client.exec_command(cmd)
+                    stdout.channel.recv_exit_status()  # Wait for command to complete
+                    time.sleep(20)  # Wait before checking server status
+
+                    # Check server status
+                    while not check_server_up(hostname):
+                        time.sleep(5)  # Check every 5 seconds if the server is back online
+
+                    client.close()  # Close the previous client
+                    client = ssh_login(hostname)  # Reconnect
+
+                    stdin, stdout, stderr = client.exec_command("uptime")
+                    uptime = stdout.read().decode().strip()
+                    results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
+                    stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
                     stdscr.refresh()
 
-                    try:
-                        # Initialize SSH client
-                        client = ssh_login(hostname)
+                except Exception as e:
+                    results.append(f"{hostname}: Error fetching uptime - {str(e)}")
+                    stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
+                    stdscr.refresh()
 
-                        # Issue reboot command
-                        stdin, stdout, stderr = client.exec_command(cmd)
-                        stdout.channel.recv_exit_status()  # Wait for command to complete
-                        time.sleep(20)  # Wait before checking server status
-
-                        # Check server status
-                        while not check_server_up(hostname):
-                            time.sleep(5)  # Check every 5 seconds if the server is back online
-
-                        client.close()  # Close the previous client
-                        client = ssh_login(hostname)  # Reconnect
-
-                        stdin, stdout, stderr = client.exec_command("uptime")
-                        uptime = stdout.read().decode().strip()
-                        results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
-                        stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
-                        stdscr.refresh()
-
-                        log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
-
-                    except Exception as e:
-                        results.append(f"{hostname}: Error fetching uptime - {str(e)}")
-                        stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
-                        stdscr.refresh()
-                        log_file.write(f"Error fetching uptime - {str(e)}\n")
-
-                    finally:
-                        if client is not None:
-                            client.close()  # Ensure client is closed properly
+                finally:
+                    if client is not None:
+                        client.close()  # Ensure client is closed properly
 
                 # Wait for 20 seconds before proceeding to the next server, except for the last server
                 if hostname != selected_servers[-1]:
