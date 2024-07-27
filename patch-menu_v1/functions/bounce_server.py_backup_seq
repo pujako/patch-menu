@@ -1,12 +1,10 @@
 import time
 import datetime
 import os
-import threading
 from utils.prompt_confirmation import prompt_confirmation
 from utils.ssh_utils import ssh_login  # Import the ssh_login function
 from utils.select_servers_to_reboot import select_servers_to_reboot
 from utils.check_server_up import check_server_up
-from utils.prompt_reboot_mode import prompt_reboot_mode  # Import the prompt_reboot_mode function
 
 def bounce_server(stdscr, server_list):
     stdscr.clear()
@@ -28,16 +26,27 @@ def bounce_server(stdscr, server_list):
 
         confirmation = prompt_confirmation(stdscr, selected_servers, "reboot")
         if confirmation == 'yes':
-            reboot_mode = prompt_reboot_mode(stdscr)
-
             stdscr.clear()
             stdscr.addstr(0, 0, "Rebooting the selected servers...\n")
             stdscr.refresh()
 
             results = []
 
-            def run_command_on_remote_bounce(stdscr, cmd, y, x, hostname, results, is_reboot=False):
-                if is_reboot:
+            for idx, hostname in zip(selected_indices, selected_servers):
+                y = idx + 1
+                x = 0
+                cmd = "shutdown -r now"
+                timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+                log_directory = 'logs'
+                if not os.path.exists(log_directory):
+                    os.makedirs(log_directory)
+                log_filename = f"{hostname}.bounce.{timestamp}.log"
+                log_filepath = os.path.join(log_directory, log_filename)
+
+                with open(log_filepath, 'w') as log_file:
+                    log_file.write(f"Command: {cmd}\n")
+                    log_file.write(f"Hostname: {hostname}\n\n")
+
                     results.append(f"{hostname}: Rebooting...")
                     stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
                     stdscr.refresh()
@@ -64,48 +73,21 @@ def bounce_server(stdscr, server_list):
                         stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
                         stdscr.refresh()
 
+                        log_file.write(f"Rebooted and back online. Uptime: {uptime}\n")
+
                     except Exception as e:
                         results.append(f"{hostname}: Error fetching uptime - {str(e)}")
                         stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
                         stdscr.refresh()
+                        log_file.write(f"Error fetching uptime - {str(e)}\n")
 
                     finally:
                         if client is not None:
                             client.close()  # Ensure client is closed properly
 
-                else:
-                    # Handle non-reboot commands here
-                    pass
-
-            if reboot_mode == 'sequential':
-                for idx, hostname in zip(selected_indices, selected_servers):
-                    y = idx + 1
-                    x = 0
-                    cmd = "shutdown -r now"
-                    
-                    results.append(f"{hostname}: Rebooting...")
-                    stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
-                    stdscr.refresh()
-
-                    run_command_on_remote_bounce(stdscr, cmd, y, x, hostname, results, True)
-
-                    # Wait for 20 seconds before proceeding to the next server, except for the last server
-                    if hostname != selected_servers[-1]:
-                        time.sleep(20)
-            
-            elif reboot_mode == 'parallel':
-                threads = []
-                for idx, hostname in zip(selected_indices, selected_servers):
-                    y = idx + 1
-                    x = 0
-                    cmd = "shutdown -r now"
-                    thread = threading.Thread(target=run_command_on_remote_bounce, args=(stdscr, cmd, y, x, hostname, results, True))
-                    threads.append(thread)
-                    thread.start()
-                    time.sleep(20)  # Wait 20 seconds before starting the next reboot
-
-                for thread in threads:
-                    thread.join()
+                # Wait for 20 seconds before proceeding to the next server, except for the last server
+                if hostname != selected_servers[-1]:
+                    time.sleep(20)
 
             # Write results to file with timestamp
             log_directory = 'logs'
