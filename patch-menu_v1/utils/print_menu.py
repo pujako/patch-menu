@@ -1,7 +1,7 @@
 import curses
 from datetime import datetime
 
-def print_menu(stdscr, selected_row_idx):
+def print_menu(stdscr, selected_row_idx, selected_col_idx):
     stdscr.clear()
     h, w = stdscr.getmaxyx()
 
@@ -64,7 +64,7 @@ def print_menu(stdscr, selected_row_idx):
     for idx, row in enumerate(insight_menu):
         x = w // 4 - len(row) // 2
         y = header_y + 2 + idx
-        if selected_row_idx == idx:
+        if selected_row_idx == idx and selected_col_idx == 0:
             stdscr.attron(curses.color_pair(1))
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(1))
@@ -75,7 +75,7 @@ def print_menu(stdscr, selected_row_idx):
     for idx, row in enumerate(action_menu):
         x = 3 * w // 4 - len(row) // 2
         y = header_y + 2 + idx
-        if selected_row_idx == len(insight_menu) + idx:
+        if selected_row_idx == idx and selected_col_idx == 1:
             stdscr.attron(curses.color_pair(1))
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(1))
@@ -86,7 +86,7 @@ def print_menu(stdscr, selected_row_idx):
     exit_option = "Exit"
     exit_x = w // 2 - len(exit_option) // 2
     exit_y = header_y + max(len(insight_menu), len(action_menu)) + 4
-    if selected_row_idx == len(insight_menu) + len(action_menu):
+    if selected_row_idx == len(insight_menu) + len(action_menu) and selected_col_idx == 0:
         stdscr.attron(curses.color_pair(1))
         stdscr.addstr(exit_y, exit_x, exit_option)
         stdscr.attroff(curses.color_pair(1))
@@ -100,5 +100,53 @@ def print_menu(stdscr, selected_row_idx):
     stdscr.addstr(initials_y, initials_x, initials)
 
     stdscr.refresh()
-    return insight_menu + action_menu + [exit_option]
+    return insight_menu, action_menu, exit_option
 
+def main(stdscr):
+    curses.curs_set(0)
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLUE)
+
+    selected_row_idx = 0
+    selected_col_idx = 0  # 0 for left column, 1 for right column
+
+    insight_menu, action_menu, exit_option = print_menu(stdscr, selected_row_idx, selected_col_idx)
+
+    while True:
+        key = stdscr.getch()
+
+        if key == curses.KEY_UP:
+            if selected_col_idx == 0:
+                selected_row_idx = (selected_row_idx - 1) % (len(insight_menu) + len(action_menu) + 1)
+            else:
+                selected_row_idx = (selected_row_idx - 1) % len(action_menu)
+        elif key == curses.KEY_DOWN:
+            if selected_col_idx == 0:
+                selected_row_idx = (selected_row_idx + 1) % (len(insight_menu) + len(action_menu) + 1)
+            else:
+                selected_row_idx = (selected_row_idx + 1) % len(action_menu)
+        elif key == curses.KEY_LEFT:
+            selected_col_idx = 0
+            if selected_row_idx >= len(insight_menu):
+                selected_row_idx = 0
+        elif key == curses.KEY_RIGHT:
+            selected_col_idx = 1
+            if selected_row_idx >= len(action_menu):
+                selected_row_idx = 0
+        elif key == ord('\n'):
+            if selected_col_idx == 0:
+                if selected_row_idx < len(insight_menu):
+                    stdscr.addstr(0, 0, f"Selected {insight_menu[selected_row_idx]}")
+                    stdscr.refresh()
+                else:
+                    break
+            else:
+                if selected_row_idx < len(action_menu):
+                    stdscr.addstr(0, 0, f"Selected {action_menu[selected_row_idx]}")
+                    stdscr.refresh()
+                else:
+                    break
+
+        insight_menu, action_menu, exit_option = print_menu(stdscr, selected_row_idx, selected_col_idx)
+
+curses.wrapper(main)
