@@ -43,7 +43,9 @@ def print_menu(stdscr, selected_row_idx):
             stdscr.addstr(y, x, row)
             stdscr.attroff(curses.color_pair(1))
         else:
+            stdscr.attron(curses.color_pair(4))  # Green color for menu items
             stdscr.addstr(y, x, row)
+            stdscr.attroff(curses.color_pair(4))
 
     # Adding initials at the bottom centered
     initials = "pujako"
