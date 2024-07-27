@@ -16,8 +16,11 @@ from functions.check_oracle_db_status import check_oracle_db_status
 def main(stdscr):
     # Color setup
     curses.start_color()
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE) # Highlight color
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK) # Title color
+    curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)  # Clock color
+    curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Menu color
+    curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Yellow menu color
     current_row = 0
     server_list = []
 
