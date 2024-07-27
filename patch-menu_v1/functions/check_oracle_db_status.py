@@ -10,32 +10,30 @@ def check_oracle_db_status(stdscr, server_list):
     threads = []
 
     # Function to check Oracle DB status on remote server and collect results
-    def run_command_and_collect_results(cmd, hostname):
+    def run_command_and_collect_results(hostname):
         nonlocal results
         try:
             client = ssh_login(hostname)  # Use the ssh_login function
-            stdin, stdout, stderr = client.exec_command(cmd)
-            
-            # Read stdout and stderr
+            command = "ps -ef | egrep 'pmon|LISTENER' | egrep -v grep"
+            stdin, stdout, stderr = client.exec_command(command)
             output = stdout.read().decode().strip()
             error = stderr.read().decode().strip()
-
+            client.close()
+            
             if error:
-                results.append(f"{hostname}: Error checking Oracle DB status - {error}")
+                result = f"{hostname}: Error checking Oracle DB status - {error}"
             elif output:
-                results.append(f"{hostname}: Oracle DB status:\n{output}")
+                result = f"{hostname}: Oracle DB status:\n{output}"
             else:
-                results.append(f"{hostname}: Oracle DB and Listener not found.")
+                result = f"{hostname}: Oracle DB and Listener not found."
+                
+            results.append(result)
         except Exception as e:
             results.append(f"{hostname}: Exception occurred - {str(e)}")
-        finally:
-            if client:
-                client.close()
 
     # Start threads for each server
     for hostname in server_list:
-        cmd = "ps -ef | egrep 'pmon|LISTENER' | egrep -v grep"
-        thread = threading.Thread(target=run_command_and_collect_results, args=(cmd, hostname))
+        thread = threading.Thread(target=run_command_and_collect_results, args=(hostname,))
         threads.append(thread)
         thread.start()
 
@@ -52,4 +50,3 @@ def check_oracle_db_status(stdscr, server_list):
     stdscr.addstr(y, 0, "Press any key to return to the menu.")
     stdscr.refresh()
     stdscr.getch()
-
