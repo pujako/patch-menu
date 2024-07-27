@@ -43,8 +43,12 @@ def main(stdscr):
                 selected_row_idx = (selected_row_idx + 1) % max_menu_len
         elif key == curses.KEY_LEFT:
             selected_col_idx = (selected_col_idx - 1) % 3
+            if selected_col_idx == 2:
+                selected_col_idx = 1
         elif key == curses.KEY_RIGHT:
             selected_col_idx = (selected_col_idx + 1) % 3
+            if selected_col_idx == 2:
+                selected_col_idx = 0
         elif key == curses.KEY_ENTER or key == 10:
             if selected_col_idx == 0:
                 if selected_row_idx == 0:  # Enter server list
