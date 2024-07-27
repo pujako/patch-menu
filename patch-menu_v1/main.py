@@ -20,6 +20,7 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK) # Title color
     curses.init_pair(3, curses.COLOR_BLUE, curses.COLOR_BLACK)  # Clock color
     curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Menu color
+    curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Yellow menu color
     current_row = 0
     server_list = []
 
