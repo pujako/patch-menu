@@ -1,10 +1,12 @@
 import time
 import datetime
 import os
+import threading
 from utils.prompt_confirmation import prompt_confirmation
 from utils.ssh_utils import ssh_login  # Import the ssh_login function
 from utils.select_servers_to_reboot import select_servers_to_reboot
 from utils.check_server_up import check_server_up
+from utils.prompt_reboot_mode import prompt_reboot_mode  # Import the prompt_reboot_mode function
 
 def bounce_server(stdscr, server_list):
     stdscr.clear()
@@ -26,55 +28,84 @@ def bounce_server(stdscr, server_list):
 
         confirmation = prompt_confirmation(stdscr, selected_servers, "reboot")
         if confirmation == 'yes':
+            reboot_mode = prompt_reboot_mode(stdscr)
+
             stdscr.clear()
             stdscr.addstr(0, 0, "Rebooting the selected servers...\n")
             stdscr.refresh()
 
             results = []
 
-            for idx, hostname in zip(selected_indices, selected_servers):
-                y = idx + 1
-                x = 0
-                cmd = "shutdown -r now"
-
-                results.append(f"{hostname}: Rebooting...")
-                stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
-                stdscr.refresh()
-
-                try:
-                    # Initialize SSH client
-                    client = ssh_login(hostname)
-
-                    # Issue reboot command
-                    stdin, stdout, stderr = client.exec_command(cmd)
-                    stdout.channel.recv_exit_status()  # Wait for command to complete
-                    time.sleep(20)  # Wait before checking server status
-
-                    # Check server status
-                    while not check_server_up(hostname):
-                        time.sleep(5)  # Check every 5 seconds if the server is back online
-
-                    client.close()  # Close the previous client
-                    client = ssh_login(hostname)  # Reconnect
-
-                    stdin, stdout, stderr = client.exec_command("uptime")
-                    uptime = stdout.read().decode().strip()
-                    results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
-                    stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
+            def run_command_on_remote_bounce(stdscr, cmd, y, x, hostname, results, is_reboot=False):
+                if is_reboot:
+                    results.append(f"{hostname}: Rebooting...")
+                    stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
                     stdscr.refresh()
 
-                except Exception as e:
-                    results.append(f"{hostname}: Error fetching uptime - {str(e)}")
-                    stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
+                    try:
+                        # Initialize SSH client
+                        client = ssh_login(hostname)
+
+                        # Issue reboot command
+                        stdin, stdout, stderr = client.exec_command(cmd)
+                        stdout.channel.recv_exit_status()  # Wait for command to complete
+                        time.sleep(20)  # Wait before checking server status
+
+                        # Check server status
+                        while not check_server_up(hostname):
+                            time.sleep(5)  # Check every 5 seconds if the server is back online
+
+                        client.close()  # Close the previous client
+                        client = ssh_login(hostname)  # Reconnect
+
+                        stdin, stdout, stderr = client.exec_command("uptime")
+                        uptime = stdout.read().decode().strip()
+                        results.append(f"{hostname}: Rebooted and back online. Uptime: {uptime}")
+                        stdscr.addstr(y, x, f"{hostname}: Rebooted and back online. Uptime: {uptime}\n")
+                        stdscr.refresh()
+
+                    except Exception as e:
+                        results.append(f"{hostname}: Error fetching uptime - {str(e)}")
+                        stdscr.addstr(y, x, f"{hostname}: Error fetching uptime - {str(e)}\n")
+                        stdscr.refresh()
+
+                    finally:
+                        if client is not None:
+                            client.close()  # Ensure client is closed properly
+
+                else:
+                    # Handle non-reboot commands here
+                    pass
+
+            if reboot_mode == 'sequential':
+                for idx, hostname in zip(selected_indices, selected_servers):
+                    y = idx + 1
+                    x = 0
+                    cmd = "shutdown -r now"
+                    
+                    results.append(f"{hostname}: Rebooting...")
+                    stdscr.addstr(y, x, f"{hostname}: Rebooting...\n")
                     stdscr.refresh()
 
-                finally:
-                    if client is not None:
-                        client.close()  # Ensure client is closed properly
+                    run_command_on_remote_bounce(stdscr, cmd, y, x, hostname, results, True)
 
-                # Wait for 20 seconds before proceeding to the next server, except for the last server
-                if hostname != selected_servers[-1]:
-                    time.sleep(20)
+                    # Wait for 20 seconds before proceeding to the next server, except for the last server
+                    if hostname != selected_servers[-1]:
+                        time.sleep(20)
+            
+            elif reboot_mode == 'parallel':
+                threads = []
+                for idx, hostname in zip(selected_indices, selected_servers):
+                    y = idx + 1
+                    x = 0
+                    cmd = "shutdown -r now"
+                    thread = threading.Thread(target=run_command_on_remote_bounce, args=(stdscr, cmd, y, x, hostname, results, True))
+                    threads.append(thread)
+                    thread.start()
+                    time.sleep(20)  # Wait 20 seconds before starting the next reboot
+
+                for thread in threads:
+                    thread.join()
 
             # Write results to file with timestamp
             log_directory = 'logs'
