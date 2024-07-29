@@ -30,6 +30,9 @@ def bounce_server(stdscr, server_list):
         if confirmation == 'yes':
             reboot_mode = prompt_reboot_mode(stdscr)
 
+            if reboot_mode == 'exit':
+                return  # Exit and go back to the previous menu
+
             stdscr.clear()
             stdscr.addstr(0, 0, "Rebooting the selected servers...\n")
             stdscr.refresh()
