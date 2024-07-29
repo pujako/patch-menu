@@ -9,6 +9,8 @@ def prompt_reboot_mode(stdscr):
             return 'sequential'
         elif key == ord('p'):
             return 'parallel'
+        elif key == ord('e'):
+            return 'exit'        
         else:
             stdscr.addstr(2, 0, "Invalid input. Press 's' for sequential or 'p' for parallel: ")
             stdscr.refresh()
