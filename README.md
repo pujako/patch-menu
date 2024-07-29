@@ -63,6 +63,7 @@ pyhton main.py
 - **Enter Server List**: Add servers to the list for management.
 - **List Servers**: Display the current list of servers.
 - **Check Server Uptime**: View the uptime of the listed servers.
+- **Check Oracle DB Status**: View the Oracle DB status of the listed servers.
 - **Gather server info**: Record and save info for each server as such system selease, DB instances, disk usage, uptime, IP addresses and process list.
 - **List Repo Files**: List repository files on the servers.
 - **Disable External Repos**: Temporarily disable external repositories.
